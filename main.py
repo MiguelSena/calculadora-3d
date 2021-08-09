@@ -1,4 +1,3 @@
-from inspect import Parameter
 from PySimpleGUI import *
 
 class Calculator:
