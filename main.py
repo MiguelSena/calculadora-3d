@@ -18,7 +18,7 @@ class Calculator:
             [Text('Energia', font = ('Arial', 12, 'bold'))],
             [
                 Text('Taxa de distribuição de energia:'), 
-                Input(size = (10, 1)), 
+                Input(size = (10, 1), key = 'tax'), 
                 Text('Gasto da impressora (W):'), 
                 Input(size = (10, 1), key = 'watts'), 
                 Text('Tempo de impressão: (h):'), 
@@ -59,7 +59,42 @@ class Calculator:
                 popup_error('Preencha todos os parâmetros (ponha 0 se não quiser algum parâmetro)')
                 return 
 
-            data[i] = int(data[i])
+            try:
+                data[i] = float(data[i])
+            except:
+                popup_error('Em números decimais, troque "," por "."')
+                return
+
+        filament_price = (data[0] * data[1]) / 1000
+        energy = (data[2] * data[3] * data[4]) / 1000
+        manual = data[5] * data[6] 
+        other = data[7]
+        total_np = filament_price + energy + manual + other
+        profit = total_np * (data[8] / 100)
+        total = total_np + profit
+
+        self.total_screen([filament_price, energy, manual, other, profit, total])
+
+    def total_screen(self, data: list):
+        layout = [
+            [Text('Valores finais:', font = ('Arial', 15, 'bold'))],
+            [Text('Preço do filamento:', font = ('Arial', 12, 'bold')), Text(f'R${data[0]}')],
+            [Text('Preço da energia:', font = ('Arial', 12, 'bold')), Text(f'R${data[1]}')],
+            [Text('Preço pelo trabalho manual:', font = ('Arial', 12, 'bold')), Text(f'R${data[2]}')],
+            [Text('Outros:', font = ('Arial', 12, 'bold')), Text(f'R${data[3]}')],
+            [Text('Seu lucro:', font = ('Arial', 12, 'bold')), Text(f'R${data[4]}')],
+            [Text('Total', font = ('Arial', 12, 'bold')), Text(f'R${data[5]}')]
+        ]
+
+        self.window.close()
+
+        total_window = Window('Calculadora 3D', layout)
+
+        while True:
+            events, values = total_window.Read()
+            
+            if events == WINDOW_CLOSED:
+                break
 
     def window_loop(self):
         while True:
@@ -68,9 +103,10 @@ class Calculator:
             if events == WINDOW_CLOSED:
                 break
 
-            elif events == 'Gerar valor':
+            if events == 'Gerar valor':
                 filament = values['filament']
                 weight = values['weight']
+                tax = values['tax']
                 watts = values['watts']
                 hours = values['hours']
                 manual_price = values['manual_price']
@@ -78,7 +114,7 @@ class Calculator:
                 other = values['other']
                 profit = values['profit']
 
-                self.treat_data([filament, weight, watts, hours, manual_price, manual_hours, other, profit])         
+                self.treat_data([filament, weight, watts, hours, tax, manual_price, manual_hours, other, profit])         
     
 calculator = Calculator()
 calculator.create()
